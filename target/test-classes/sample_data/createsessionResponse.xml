@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:createsessionResponse xmlns:ns0="urn:UMARKETSCWS">
+  <ns0:createsessionReturn>
+    <ns0:sessionid>????</ns0:sessionid>
+    <ns0:result>1</ns0:result>
+    <ns0:result_namespace>????</ns0:result_namespace>
+  </ns0:createsessionReturn>
+</ns0:createsessionResponse>
