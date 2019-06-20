@@ -1,0 +1,23 @@
+
+  post:
+    description: This API is used to login
+    body: 
+      application/json:       
+        properties:
+          urn:sessionid:
+            description: user session id 
+            type: string
+            required: false  
+          urn:initiator:
+            description: phone no
+            type: string
+            required: false          
+          urn:pin:
+            description: pin 
+            type: string
+            required: false                             
+    responses: 
+      200:
+        description: Login  
+        body: 
+          application/json:

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <apikit:config name="url-config" raml="url-config.raml" consoleEnabled="true" consolePath="console" keepRamlBaseUri="false" doc:name="Router"/>
+    <flow name="loginFlow">
+        <http:listener config-ref="My_HTTP_Listener_Configuration" path="/login/*" doc:name="HTTP"/>
+        <apikit:router config-ref="url-config" doc:name="APIkit Router"/>
+    </flow>
+    <flow name="get:/req_session:url-config">
+        <ws:consumer config-ref="My_Web_Service_Consumer" operation="createsession" doc:name="Session Soap Web Service Consumer"/>
+        <dw:transform-message doc:name="Convert Session JSON Transform Message" metadata:id="d6197ed1-8674-481e-867b-1b3a8f0bc868">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 urn:UMARKETSCWS
+---
+{
+	"ns0:createsessionResponse": {
+		"ns0:createsessionReturn": {
+			"ns0:sessionid": payload.ns0#createsessionResponse.ns0#createsessionReturn.ns0#sessionid,
+			"ns0:result": payload.ns0#createsessionResponse.ns0#createsessionReturn.ns0#result,
+			"ns0:result_namespace": payload.ns0#createsessionResponse.ns0#createsessionReturn.ns0#result_namespace
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="post:/req_login:url-config">
+        <json:json-to-object-transformer doc:name="Get JSON to Object"/>
+        <dw:transform-message doc:name="Set XML Req Transform Message" metadata:id="b2f754d7-d52a-4694-b01f-99379f32129d">
+            <dw:input-payload mimeType="application/json" doc:sample="C:\ssh\sample json.json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 urn:UMARKETSCWS
+---
+{
+	ns0#login: {
+		ns0#loginRequest: {
+			ns0#sessionid: payload."urn:login"."urn:loginRequest"."urn:sessionid",
+			ns0#initiator: payload."urn:login"."urn:loginRequest"."urn:initiator",
+			ns0#pin: payload."urn:login"."urn:loginRequest"."urn:pin"
+		}
+	}
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="final req---&gt;#[payload]&lt;---" level="INFO" doc:name="Logger"/>
+        <ws:consumer config-ref="My_Web_Service_Consumer" operation="login" doc:name="Login Soap Web Service Consumer"/>
+        <dw:transform-message doc:name="Convert Login Respo JSONTransform Message" metadata:id="5ea15a26-e61d-46b6-befb-2a617cf647de">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 urn:UMARKETSCWS
+---
+{
+	"ns0:loginResponse": {
+		"ns0:loginReturn": {
+			"ns0:result": payload.ns0#loginResponse.ns0#loginReturn.ns0#result,
+			"ns0:result_namespace": payload.ns0#loginResponse.ns0#loginReturn.ns0#result_namespace
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="post:/req_login_fix:url-config">
+        <json:json-to-object-transformer doc:name="JSON to Object"/>
+        <set-variable variableName="loginReq" value="#[payload]" doc:name="Variable"/>
+        <set-variable variableName="propVariable" value="${password}" doc:name="Prop Variable"/>
+        <dw:transform-message doc:name="Combination Transform Message" metadata:id="377236e7-b78f-4bc3-aac3-413376152e39">
+            <dw:input-payload/>
+            <dw:input-variable mimeType="application/json" variableName="loginReq"/>
+            <dw:input-variable mimeType="application/java" variableName="propVariable"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 urn:UMARKETSCWS
+---
+{
+	ns0#login: {
+		ns0#loginRequest: {
+			ns0#sessionid: flowVars.loginReq."urn:login"."urn:loginRequest"."urn:sessionid",
+			ns0#initiator: flowVars.loginReq."urn:login"."urn:loginRequest"."urn:initiator",
+			ns0#pin: flowVars.loginReq."urn:login"."urn:loginRequest"."urn:pin"
+++ flowVars.propVariable
+		}
+	}
+}
+
+
+
+]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="1111----------&gt;#[payload]&lt;------------" level="INFO" doc:name="Logger"/>
+
+        <ws:consumer config-ref="My_Web_Service_Consumer" operation="login" doc:name="Login Soap Web Service Consumer"/>
+        <dw:transform-message doc:name="Convert Login Respo JSONTransform Message" metadata:id="5ea15a26-e61d-46b6-befb-2a617cf647de">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 urn:UMARKETSCWS
+---
+{
+	"ns0:loginResponse": {
+		"ns0:loginReturn": {
+			"ns0:result": payload.ns0#loginResponse.ns0#loginReturn.ns0#result,
+			"ns0:result_namespace": payload.ns0#loginResponse.ns0#loginReturn.ns0#result_namespace
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+</mule>

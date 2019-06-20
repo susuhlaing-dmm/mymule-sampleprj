@@ -1,0 +1,17 @@
+{
+    "inputMessageMetadata": {},
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "My_Web_Service_Consumer",
+            "typeId": "createsessionResponse"
+        },
+        "flowVariables": {
+            "msf_response": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "String"
+            }
+        }
+    },
+    "id": "5dafa3f5-8a8a-4ff6-86fb-f1e42395adf3",
+    "version": "5.2.0.0"
+}

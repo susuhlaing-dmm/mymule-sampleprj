@@ -1,0 +1,23 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {},
+        "flowVariables": {
+            "loginReq": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "Json"
+            },
+            "propVariable": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "String"
+            }
+        }
+    },
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "My_Web_Service_Consumer",
+            "typeId": "login"
+        }
+    },
+    "id": "377236e7-b78f-4bc3-aac3-413376152e39",
+    "version": "5.2.0.0"
+}

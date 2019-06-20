@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {},
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "My_Web_Service_Consumer",
+            "typeId": "createsessionResponse"
+        }
+    },
+    "id": "ef999c47-8c37-4f72-8ebc-0afe7d7570f0",
+    "version": "5.2.0.0"
+}
